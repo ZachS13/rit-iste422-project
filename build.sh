@@ -6,13 +6,17 @@ rm -f *.class
 # Note that {} are replaced with each file name
 find . -name \*.class -exec rm {} \;
 
-echo "Compiling source code and unit tests..."
-javac -classpath .:lib/junit-4.12.jar:lib/hamcrest-core-1.3.jar *.java
-if [ $? -ne 0 ] ; then echo BUILD FAILED!; exit 1; fi
+echo "Compiling source code..."
+javac -d build -sourcepath src/main/java -cp lib/junit-4.12.jar:lib/hamcrest-core-1.3.jar src/main/java/*.java
+if [ $? -ne 0 ]; then echo "BUILD FAILED!" ; exit 1 ; fi
+
+echo "Compiling unit tests..."
+javac -d build -sourcepath src/test/java -cp .:lib/junit-4.12.jar:lib/hamcrest-core-1.3.jar src/test/java/*.java
+if [ $? -ne 0 ]; then echo "TESTS COMPILATION FAILED!" ; exit 1 ; fi
 
 echo "Running unit tests..."
-java -cp .:lib/junit-4.12.jar:lib/hamcrest-core-1.3.jar org.junit.runner.JUnitCore EdgeConnectorTest
-if [ $? -ne 0 ] ; then echo TESTS FAILED!; exit 1; fi
+java -cp .:build:lib/junit-4.12.jar:lib/hamcrest-core-1.3.jar org.junit.runner.JUnitCore EdgeConnectorTest
+if [ $? -ne 0 ]; then echo "TESTS FAILED!" ; exit 1 ; fi
 
 echo "Running application..."
-java -classpath . RunEdgeConvert
+java -cp .:build src/main/java/RunEdgeConvert
